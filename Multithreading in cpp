@@ -1,0 +1,592 @@
+Thread creation
+
+#include <iostream>
+#include <thread>  // For std::thread
+
+// Function to be executed by the thread
+void printHello() {
+    std::cout << "Hello from the thread!" << std::endl;
+}
+
+int main() {
+    // Create a thread to execute the printHello function
+    std::thread t(printHello);
+
+    // Wait for the thread to finish (join it)
+    t.join();
+
+    std::cout << "Main thread finishing." << std::endl;
+
+    return 0;
+}
+output:
+Hello from the thread!
+Main thread finishing.
+
+*************************************************************
+Thread creation with arguments
+
+#include <iostream>
+#include <thread>  // For std::thread
+
+// Function to be executed by the thread
+void printHello() {
+    std::cout << "Hello from the thread!" << std::endl;
+}
+
+int main() {
+    // Create a thread to execute the printHello function
+    std::thread t(printHello);
+
+    // Wait for the thread to finish (join it)
+    t.join();
+
+    std::cout << "Main thread finishing." << std::endl;
+
+    return 0;
+}
+output:
+Hello from the thread!
+Hello from the thread!
+Hello from the thread!
+Main thread finishing.
+
+*******************************************************************
+thread join
+join(): This is used when you want the main thread to wait for the newly created thread to finish. The main thread will block until the thread completes.
+
+#include <iostream>
+#include <thread>
+
+// Shared resource
+int counter = 0;
+// Function to increment the counter
+void incrementCounter() {
+    ++counter;
+    std::cout << "Counter: " << counter << std::endl;
+}
+
+int main() {
+    // Create multiple threads that will call incrementCounter
+    std::thread t1(incrementCounter);
+    std::thread t2(incrementCounter);
+    std::thread t3(incrementCounter);
+
+    // Wait for all threads to finish
+    t1.join();
+    t2.join();
+    t3.join();
+
+    return 0;
+}
+output:
+Counter: 1
+Counter: 2
+Counter: 3
+
+****************************************************************************
+Detach thread
+detach(): This is used when you want the thread to run independently, and you don't need to wait for it. However, you cannot join() a detached thread.
+In C++, the std::thread::detach function is used to detach a thread from the current thread of execution. When you detach a thread, 
+it allows the thread to execute independently from the calling thread. Once a thread is detached, 
+it runs in the background and is no longer associated with the thread object, meaning you cannot join it later. 
+In other words, it becomes a "background thread" that is allowed to finish executing on its own.
+#include <iostream>
+#include <thread>
+#include <chrono>
+
+void backgroundTask() {
+    std::cout << "Background task starting...\n";
+    std::this_thread::sleep_for(std::chrono::seconds(2)); // Simulate work
+    std::cout << "Background task finished.\n";
+}
+
+int main() {
+    // Create a thread that runs the backgroundTask function
+    std::thread t(backgroundTask);
+    
+    // Detach the thread, so it runs in the background
+    t.detach();
+
+    // Main thread continues execution without waiting for the background thread
+    std::cout << "Main thread is doing other work...\n";
+    std::this_thread::sleep_for(std::chrono::seconds(1)); // Simulate work
+    std::cout << "Main thread finishing.\n";
+
+    // The background thread will still be running independently here
+
+    return 0;
+}
+output:
+Main thread is doing other work...
+Background task starting...
+Main thread finishing.
+Background task finished.
+
+***************************************************
+mutex-lock and unlock
+#include <iostream>
+#include <thread>
+#include <mutex>
+
+// Shared resource
+int counter = 0;
+
+// Mutex to protect the shared resource
+std::mutex mtx;
+
+// Function to increment the counter
+void incrementCounter() {
+    // Lock the mutex before accessing the shared resource
+    mtx.lock();
+    // Critical section: Incrementing the shared counter
+    ++counter;
+    std::cout << "Counter: " << counter << std::endl;
+    // Unlock the mutex after finishing the critical section
+    mtx.unlock();
+}
+
+int main() {
+    // Create multiple threads that will call incrementCounter
+    std::thread t1(incrementCounter);
+    std::thread t2(incrementCounter);
+    std::thread t3(incrementCounter);
+
+    // Wait for all threads to finish
+    t1.join();
+    t2.join();
+    t3.join();
+
+    return 0;
+}
+output:
+Counter: 1
+Counter: 2
+Counter: 3
+
+
+****************************************************
+mutex lock_guard
+Manually locking and unlocking a mutex can lead to issues like forgetting to unlock it, 
+which can cause deadlocks or resource leaks. To prevent such problems, C++ provides std::lock_guard, 
+a RAII (Resource Acquisition Is Initialization) class that automatically locks the mutex when the lock_guard object is created and unlocks it when the object goes out of scope.
+
+#include <iostream>
+#include <thread>
+#include <mutex>
+
+// Shared resource
+int counter = 0;
+
+// Mutex to protect the shared resource
+std::mutex mtx;
+
+// Function to increment the counter
+void incrementCounter() {
+    // Lock the mutex before accessing the shared resource
+   std::lock_guard<std::mutex> lock(mtx);
+    // Critical section: Incrementing the shared counter
+    ++counter;
+    std::cout << "Counter: " << counter << std::endl;
+    // Unlock the mutex after finishing the critical section
+    //mtx.unlock();
+}
+
+int main() {
+    // Create multiple threads that will call incrementCounter
+    std::thread t1(incrementCounter);
+    std::thread t2(incrementCounter);
+    std::thread t3(incrementCounter);
+
+    // Wait for all threads to finish
+    t1.join();
+    t2.join();
+    t3.join();
+
+    return 0;
+}
+*******************************************************************
+std::unique_lock: More Flexible Locking
+
+std::unique_lock is a more flexible alternative to std::lock_guard. 
+It provides the same automatic locking and unlocking as std::lock_guard, but it allows additional features, such as:
+Manual unlocking and locking (you can lock and unlock the mutex multiple times).
+Ownership transfer between std::unique_lock objects.
+
+#include <iostream>
+#include <thread>
+#include <mutex>
+
+// Shared resource
+int counter = 0;
+
+// Mutex to protect the shared resource
+std::mutex mtx;
+
+// Function to increment the counter using unique_lock
+void incrementCounter() {
+    std::unique_lock<std::mutex> lock(mtx);
+    // Critical section: Incrementing the shared counter
+    ++counter;
+    std::cout << "Counter: " << counter << std::endl;
+
+    // Unlock the mutex explicitly if needed
+    // lock.unlock();  // You can unlock manually if necessary
+
+    // The mutex will automatically be unlocked when lock goes out of scope
+}
+
+int main() {
+    // Create multiple threads that will call incrementCounter
+    std::thread t1(incrementCounter);
+    std::thread t2(incrementCounter);
+    std::thread t3(incrementCounter);
+
+    // Wait for all threads to finish
+    t1.join();
+    t2.join();
+    t3.join();
+
+    return 0;
+}
+*************************************************
+std::lock: Locking Multiple Mutexes
+
+#include <iostream>
+#include <thread>
+#include <mutex>
+
+std::mutex mtx1, mtx2;
+
+void task1() {
+    std::lock(mtx1, mtx2);  // Locks both mtx1 and mtx2 without deadlock
+    std::lock_guard<std::mutex> lg1(mtx1, std::adopt_lock);  // adopt_lock means we won't lock again
+    std::lock_guard<std::mutex> lg2(mtx2, std::adopt_lock);
+    
+    std::cout << "Task 1 is executing\n";
+}
+
+void task2() {
+    std::lock(mtx1, mtx2);
+    std::lock_guard<std::mutex> lg1(mtx1, std::adopt_lock);
+    std::lock_guard<std::mutex> lg2(mtx2, std::adopt_lock);
+
+    std::cout << "Task 2 is executing\n";
+}
+
+int main() {
+    std::thread t1(task1);
+    std::thread t2(task2);
+
+    t1.join();
+    t2.join();
+
+    return 0;
+}
+**************************************************************
+A condition variable is a synchronization primitive in C++ that allows threads to wait for certain conditions to be met before continuing their execution. 
+It is often used in scenarios where a thread needs to wait for another thread to perform some operation, 
+like notifying a thread when a resource becomes available, or when certain conditions are true.
+
+#include <iostream>
+#include <thread>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+
+std::queue<int> q;                   // Shared queue between producer and consumer
+std::mutex mtx;                      // Mutex to protect shared data
+std::condition_variable cv;          // Condition variable to synchronize threads
+
+// Producer function
+void producer() {
+    for (int i = 0; i < 10; ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));  // Simulate work
+        std::lock_guard<std::mutex> lock(mtx);  // Lock the mutex
+        q.push(i);  // Produce an item
+        std::cout << "Produced: " << i << std::endl;
+        cv.notify_one();  // Notify the consumer
+    }
+}
+
+// Consumer function
+void consumer() {
+    while (true) {
+        std::unique_lock<std::mutex> lock(mtx);  // Lock the mutex
+        cv.wait(lock, []{ return !q.empty(); });  // Wait until the queue is not empty
+        int item = q.front();  // Consume an item
+        q.pop();
+        std::cout << "Consumed: " << item << std::endl;
+
+        // If we have processed 10 items, break the loop
+        if (item == 9) {
+            break;
+        }
+    }
+}
+
+int main() {
+    // Create producer and consumer threads
+    std::thread prod(producer);
+    std::thread cons(consumer);
+
+    // Wait for both threads to finish
+    prod.join();
+    cons.join();
+
+    return 0;
+}
+output:
+Produced: 0
+Consumed: 0
+Produced: 1
+Consumed: 1
+Produced: 2
+Consumed: 2
+Produced: 3
+Consumed: 3
+Produced: 4
+Consumed: 4
+Produced: 5
+Consumed: 5
+Produced: 6
+Consumed: 6
+Produced: 7
+Consumed: 7
+Produced: 8
+Consumed: 8
+Produced: 9
+Consumed: 9
+
+**********************************************
+Condition Variable with wait_for Example
+
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
+
+std::mutex mtx;
+std::condition_variable cv;
+bool ready = false;  // Condition variable to signal readiness
+
+// Thread that waits for a condition to be true or a timeout
+void wait_for_condition() {
+    std::unique_lock<std::mutex> lock(mtx);
+    if (!cv.wait_for(lock, std::chrono::seconds(5), []{ return ready; })) {
+        std::cout << "Timed out waiting for condition!" << std::endl;
+    } else {
+        std::cout << "Condition met, proceeding..." << std::endl;
+    }
+}
+
+// Thread that sets the condition to true
+void set_condition() {
+    std::this_thread::sleep_for(std::chrono::seconds(2)); // Simulate work
+    {
+        std::lock_guard<std::mutex> lock(mtx);
+        ready = true;
+    }
+    cv.notify_all();  // Notify waiting threads
+}
+
+int main() {
+    std::thread t1(wait_for_condition); // Waiting thread
+    std::thread t2(set_condition);      // Thread that sets the condition
+
+    t1.join();
+    t2.join();
+
+    return 0;
+}
+output:
+Timed out waiting for condition!
+******************************************************
+Binary semaphore:
+In C++, a binary semaphore is a synchronization mechanism that allows two or more threads to coordinate their execution.
+It can only take two values: 0 and 1, similar to a flag or a mutex. 
+A binary semaphore typically represents a resource that can either be "locked" or "unlocked," 
+often used to protect shared resources or synchronize access to a particular section of code.
+
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+
+class BinarySemaphore {
+private:
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool flag = false;  // Binary semaphore can be either true (1) or false (0)
+
+public:
+    // Wait (P operation): block until flag is true
+    void wait() {
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [this]() { return flag; });
+        flag = false;  // After "waiting", set the flag to false (lock acquired)
+    }
+
+    // Signal (V operation): set flag to true and notify waiting threads
+    void signal() {
+        std::lock_guard<std::mutex> lock(mtx);
+        flag = true;
+        cv.notify_one();  // Notify one waiting thread
+    }
+};
+
+void worker(BinarySemaphore& sem, int id) {
+    std::cout << "Thread " << id << " is waiting for semaphore\n";
+    sem.wait();
+    std::cout << "Thread " << id << " has entered the critical section\n";
+
+    // Simulate some work in the critical section
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    std::cout << "Thread " << id << " is leaving the critical section\n";
+    sem.signal();
+}
+
+int main() {
+    BinarySemaphore sem;
+
+    // Create multiple threads trying to access the critical section
+    std::thread t1(worker, std::ref(sem), 1);
+    std::thread t2(worker, std::ref(sem), 2);
+    std::thread t3(worker, std::ref(sem), 3);
+
+    // Initially, signal the semaphore to allow the first thread to enter
+    sem.signal();
+
+    t1.join();
+    t2.join();
+    t3.join();
+
+    return 0;
+}
+output:
+Thread 1 is waiting for semaphore
+Thread 1 has entered the critical section
+Thread 2 is waiting for semaphore
+Thread 3 is waiting for semaphore
+Thread 1 is leaving the critical section
+Thread 2 has entered the critical section
+Thread 2 is leaving the critical section
+Thread 3 has entered the critical section
+Thread 3 is leaving the critical section
+***********************************************************
+Thread Pool
+
+A thread pool is a collection of worker threads that can be used to execute tasks concurrently. 
+Rather than creating and destroying threads every time a task needs to be executed, 
+a thread pool maintains a set of threads that can be reused to execute multiple tasks. 
+
+#include <iostream>
+#include <thread>
+#include <vector>
+#include <queue>
+#include <functional>
+#include <atomic>
+#include <condition_variable>
+
+class ThreadPool {
+public:
+    // Constructor to initialize the thread pool with a specified number of threads
+    ThreadPool(size_t numThreads) : stop(false) {
+        for (size_t i = 0; i < numThreads; ++i) {
+            workers.push_back(std::thread([this]() { this->workerThread(); }));
+        }
+    }
+
+    // Destructor to join all threads
+    ~ThreadPool() {
+        {
+            std::lock_guard<std::mutex> lock(queueMutex);
+            stop = true;
+        }
+        cv.notify_all();
+
+        for (auto& worker : workers) {
+            if (worker.joinable()) {
+                worker.join();
+            }
+        }
+    }
+
+    // Function to add tasks to the pool
+    template <typename F>
+    void enqueue(F&& f) {
+        {
+            std::lock_guard<std::mutex> lock(queueMutex);
+            tasks.push(std::forward<F>(f));
+        }
+        cv.notify_one();
+    }
+
+private:
+    // Worker function for each thread
+    void workerThread() {
+        while (true) {
+            std::function<void()> task;
+
+            {
+                std::unique_lock<std::mutex> lock(queueMutex);
+                cv.wait(lock, [this] { return stop || !tasks.empty(); });
+
+                if (stop && tasks.empty()) {
+                    return; // Exit the thread if the pool is stopped
+                }
+
+                task = std::move(tasks.front());
+                tasks.pop();
+            }
+
+            task(); // Execute the task
+        }
+    }
+
+    std::vector<std::thread> workers;               // The worker threads
+    std::queue<std::function<void()>> tasks;        // Queue of tasks
+    std::mutex queueMutex;                          // Mutex to protect task queue
+    std::condition_variable cv;                     // Condition variable for task notification
+    std::atomic<bool> stop;                         // Flag to indicate if the pool is stopped
+};
+
+void exampleTask(int id) {
+    std::cout << "Task " << id << " is being processed by thread " << std::this_thread::get_id() << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Simulate work
+    std::cout << "Task " << id << " is completed by thread " << std::this_thread::get_id() << std::endl;
+}
+
+int main() {
+    // Create a thread pool with 4 worker threads
+    ThreadPool pool(4);
+
+    // Enqueue some tasks
+    for (int i = 0; i < 10; ++i) {
+        pool.enqueue([i] { exampleTask(i); });
+    }
+
+    // Wait for some time to let tasks complete
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    // Thread pool will automatically clean up when it goes out of scope
+    return 0;
+}
+
+output:
+Task 0 is being processed by thread 139703241517376
+Task 1 is being processed by thread 139703233124672
+Task 2 is being processed by thread 139703224731968
+Task 3 is being processed by thread 139703216339264
+Task 4 is being processed by thread 139703207946560
+Task 5 is being processed by thread 139703199553856
+...
+Task 0 is completed by thread 139703241517376
+Task 1 is completed by thread 139703233124672
+Task 2 is completed by thread 139703224731968
+Task 3 is completed by thread 139703216339264
+
+****************************************************************
+
