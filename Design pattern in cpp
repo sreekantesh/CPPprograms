@@ -1,0 +1,4 @@
+//Factory Design pattern
+Factory Method Pattern provides an interface for creating objects but leaves the actual object instantiation to derived classes. 
+This allows for flexibility in object creation and promotes loose coupling between the client code and the concrete products.
+
