@@ -1,7 +1,6 @@
 
-c++ 17 feature and example
-ChatGPT said:
-ChatGPT
+c++ 17 feature and example:
+
 C++17 introduced a number of new features and improvements to the language. Below are some of the key features introduced in C++17, along with examples to demonstrate each one:
 
 1. Structured Bindings
@@ -9,8 +8,6 @@ Structured bindings allow you to unpack tuple-like objects (such as std::pair, s
 
 Example:
 
-cpp
-Copy code
 #include <iostream>
 #include <tuple>
 
@@ -24,13 +21,11 @@ int main() {
     std::cout << "x = " << x << ", y = " << y << ", z = " << z << std::endl;
     return 0;
 }
+***********************************
 2. if and switch with Initializers
 In C++17, you can now include a variable declaration in the condition of if and switch statements. This helps to avoid redundant code and make the logic more compact.
 
 Example:
-
-cpp
-Copy code
 #include <iostream>
 
 int main() {
@@ -44,13 +39,12 @@ int main() {
     
     return 0;
 }
+*****************************************
 3. std::optional
 std::optional is a type that represents an optional value, i.e., a value that may or may not be present. It is useful when you want to express the possibility of a value being absent.
 
 Example:
 
-cpp
-Copy code
 #include <iostream>
 #include <optional>
 
@@ -72,13 +66,12 @@ int main() {
 
     return 0;
 }
+***************************************************
 4. std::variant
 std::variant is a type-safe union. It allows you to store one of several types in a single object, but ensures that only one type is active at a time. You can use std::get to access the value stored in the variant.
 
 Example:
 
-cpp
-Copy code
 #include <iostream>
 #include <variant>
 
@@ -98,13 +91,12 @@ int main() {
     
     return 0;
 }
+*************************************
 5. std::filesystem
 C++17 introduced the <filesystem> library, which provides an API for working with files and directories in a platform-independent way.
 
 Example:
 
-cpp
-Copy code
 #include <iostream>
 #include <filesystem>
 
@@ -126,13 +118,12 @@ int main() {
 
     return 0;
 }
+*****************************
 6. std::string_view
 std::string_view provides a lightweight, non-owning view of a string. This is useful for passing around substrings or for working with strings without copying data.
 
 Example:
 
-cpp
-Copy code
 #include <iostream>
 #include <string_view>
 
@@ -149,13 +140,12 @@ int main() {
     
     return 0;
 }
+    **************************
 7. std::parallel Algorithms
 C++17 added parallel algorithms in the <algorithm> header. These algorithms allow for parallel execution of many standard algorithms, which can improve performance on multi-core systems.
 
 Example:
 
-cpp
-Copy code
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -173,13 +163,12 @@ int main() {
 
     return 0;
 }
+    *****************************
 8. std::any
 std::any is a type that can hold a single value of any type, allowing you to store values of different types in the same container. You can later retrieve the value by casting it back to the appropriate type.
 
 Example:
 
-cpp
-Copy code
 #include <iostream>
 #include <any>
 
@@ -202,13 +191,12 @@ int main() {
 
     return 0;
 }
+    ***********************************************
 9. Fold Expressions (for Variadic Templates)
 Fold expressions are a way to apply a binary operator to all elements in a parameter pack. They simplify operations on variadic templates.
 
 Example:
 
-cpp
-Copy code
 #include <iostream>
 
 template<typename... Args>
@@ -220,13 +208,12 @@ int main() {
     std::cout << "Sum of 1, 2, 3, 4: " << sum(1, 2, 3, 4) << std::endl;
     return 0;
 }
+    **********************************
 10. std::inline_variable
 C++17 allows the definition of inline variables. This is useful for variables that need to be shared across translation units, like global constants.
 
 Example:
 
-cpp
-Copy code
 #include <iostream>
 
 inline const int constant_value = 42;
@@ -235,14 +222,4 @@ int main() {
     std::cout << "The constant value is: " << constant_value << std::endl;
     return 0;
 }
-Summary:
-C++17 introduced many features to improve readability, safety, and efficiency, such as structured bindings, std::optional, std::variant, parallel algorithms, and the <filesystem> library. These features simplify common tasks and allow for more modern and expressive C++ programming.
 
-
-
-
-
-
-
-ChatGPT can make mistakes. Check important info.
-?
