@@ -1,3 +1,8 @@
+/*
+In C++, the term "mutable" is a keyword that is used to allow a class member variable to be modified even if the object it belongs to is const. 
+Normally, if you have a const object, you cannot modify any of its member variables (because the object is considered immutable). 
+However, with mutable, a member variable can be modified even when the object is marked as const.
+*/
 #include <iostream>
 using namespace std;
 
