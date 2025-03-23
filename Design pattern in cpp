@@ -1,4 +1,187 @@
-//Factory Design pattern
-Factory Method Pattern provides an interface for creating objects but leaves the actual object instantiation to derived classes. 
-This allows for flexibility in object creation and promotes loose coupling between the client code and the concrete products.
 
+**Design Patterns in C++: A Structured Overview**
+
+Design patterns provide reusable solutions to common software design problems. In C++, their implementation often leverages language-specific features like RAII, templates, and smart pointers. Below is a concise guide to key design patterns in C++:
+
+---
+
+### **1. Creational Patterns**
+**a. Singleton**  
+- **Purpose**: Ensure a class has only one instance with global access.  
+- **Implementation**:  
+  ```cpp
+  class Singleton {
+  public:
+      static Singleton& getInstance() {
+          static Singleton instance; // Thread-safe in C++11+
+          return instance;
+      }
+      Singleton(const Singleton&) = delete;
+      void operator=(const Singleton&) = delete;
+  private:
+      Singleton() {} // Private constructor
+  };
+  ```
+- **Key Points**:  
+  - Use `static` local variable for thread-safe initialization.  
+  - Delete copy constructor/assignment to prevent duplication.
+
+**b. Factory Method**  
+- **Purpose**: Delegate object creation to subclasses.  
+- **Implementation**:  
+  ```cpp
+  class Product {
+  public:
+      virtual ~Product() = default;
+      virtual void operation() = 0;
+  };
+
+  class ConcreteProduct : public Product {
+      void operation() override { /* ... */ }
+  };
+
+  class Creator {
+  public:
+      virtual std::unique_ptr<Product> createProduct() = 0;
+  };
+
+  class ConcreteCreator : public Creator {
+      std::unique_ptr<Product> createProduct() override {
+          return std::make_unique<ConcreteProduct>();
+      }
+  };
+  ```
+- **Key Points**:  
+  - Use smart pointers (`std::unique_ptr`) for ownership.  
+  - Virtual methods enable runtime polymorphism.
+
+**c. Abstract Factory**  
+- **Purpose**: Create families of related objects.  
+- **Example**:  
+  ```cpp
+  class Button { /* ... */ };
+  class WinButton : public Button { /* ... */ };
+  class MacButton : public Button { /* ... */ };
+
+  class GUIFactory {
+  public:
+      virtual std::unique_ptr<Button> createButton() = 0;
+  };
+
+  class WinFactory : public GUIFactory {
+      std::unique_ptr<Button> createButton() override {
+          return std::make_unique<WinButton>();
+      }
+  };
+  ```
+
+---
+
+### **2. Structural Patterns**
+**a. Adapter**  
+- **Purpose**: Convert an interface to another clients expect.  
+- **Implementation (Object Adapter)**:  
+  ```cpp
+  class LegacyLibrary {
+  public:
+      void legacyOperation() { /* ... */ }
+  };
+
+  class Target {
+  public:
+      virtual void request() = 0;
+  };
+
+  class Adapter : public Target {
+      LegacyLibrary adaptee;
+  public:
+      void request() override { adaptee.legacyOperation(); }
+  };
+  ```
+
+**b. Decorator**  
+- **Purpose**: Dynamically add responsibilities to objects.  
+- **Implementation**:  
+  ```cpp
+  class Component {
+  public:
+      virtual void execute() = 0;
+  };
+
+  class ConcreteComponent : public Component {
+      void execute() override { /* ... */ }
+  };
+
+  class Decorator : public Component {
+      std::unique_ptr<Component> component;
+  public:
+      Decorator(std::unique_ptr<Component> c) : component(std::move(c)) {}
+      void execute() override { component->execute(); }
+  };
+
+  class ConcreteDecorator : public Decorator {
+      void addedBehavior() { /* ... */ }
+  public:
+      using Decorator::Decorator;
+      void execute() override {
+          Decorator::execute();
+          addedBehavior();
+      }
+  };
+  ```
+
+---
+
+### **3. Behavioral Patterns**
+**a. Observer**  
+- **Purpose**: Notify dependents of state changes.  
+- **Implementation**:  
+  ```cpp
+  class Observer {
+  public:
+      virtual void update(const std::string& msg) = 0;
+  };
+
+  class Subject {
+      std::vector<Observer*> observers;
+  public:
+      void attach(Observer* o) { observers.push_back(o); }
+      void notify(const std::string& msg) {
+          for (auto o : observers) o->update(msg);
+      }
+  };
+  ```
+
+**b. Strategy**  
+- **Purpose**: Encapsulate interchangeable algorithms.  
+- **Implementation**:  
+  ```cpp
+  class Strategy {
+  public:
+      virtual void execute() = 0;
+  };
+
+  class Context {
+      std::unique_ptr<Strategy> strategy;
+  public:
+      void setStrategy(std::unique_ptr<Strategy> s) { strategy = std::move(s); }
+      void executeStrategy() { strategy->execute(); }
+  };
+  ```
+
+---
+
+### **4. Key C++ Considerations**
+1. **Memory Management**:  
+   - Prefer `std::unique_ptr` or `std::shared_ptr` over raw pointers.  
+   - Follow RAII to manage resources (e.g., files, network connections).  
+
+2. **Templates vs. Virtual Functions**:  
+   - Use templates for compile-time polymorphism (e.g., `std::function`).  
+   - Use virtual functions for runtime polymorphism (e.g., Strategy pattern).  
+
+3. **Concurrency**:  
+   - Use `std::mutex` and `std::lock_guard` for thread safety in Singleton or Observer.  
+   - Avoid data races via atomic operations or thread-local storage.  
+
+4. **Modern C
